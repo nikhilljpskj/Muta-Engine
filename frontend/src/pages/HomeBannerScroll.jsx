@@ -4,7 +4,7 @@ import './HomeBannerScroll.scss';
 
 const HomeBannerScroll = () => {
     const [currentImage, setCurrentImage] = useState(0);
-    const images = ['/img/image_1.jpg', '/img/image_2.jpg', '/img/image_3.jpg'];
+    const images = ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'];
 
     useEffect(() => {
         const interval = setInterval(() => {

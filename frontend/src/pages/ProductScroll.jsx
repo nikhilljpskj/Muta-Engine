@@ -25,16 +25,16 @@ const ProductScroll = () => {
 
     return (
         <div className="product-scroll-container">
-            <h2>Products</h2>
+            <h2 className="product-title">Products</h2>
             {loading ? (
                 <p>Loading...</p>
             ) : error ? (
                 <p className="error">{error}</p>
             ) : (
-                <div className="products">
+                <div className="product-grid">
                     {products.length > 0 ? (
                         products.map((product) => (
-                            <div key={product.id} className="product-item">
+                            <div key={product.id} className="product-card">
                                 {product.image ? (
                                     <img
                                         src={`http://localhost:5000${product.image}`}
@@ -44,8 +44,10 @@ const ProductScroll = () => {
                                 ) : (
                                     <p>No Image Available</p>
                                 )}
-                                <p>{product.name}</p>
-                                <p>Price per day: ${product.price_per_day}</p>
+                                <div className="product-info">
+                                    <h3 className="product-name">{product.name}</h3>
+                                    <p className="product-price">Price per day: ${product.price_per_day}</p>
+                                </div>
                             </div>
                         ))
                     ) : (

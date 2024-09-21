@@ -17,12 +17,10 @@ const Home = () => {
             </section>
             
             <section className="home__products">
-                <h2>Products</h2>
                 <ProductScroll />
             </section>
 
             <section className="home__categories">
-                <h2>Categories</h2>
                 <CategoryScroll />
             </section>
         </div>
