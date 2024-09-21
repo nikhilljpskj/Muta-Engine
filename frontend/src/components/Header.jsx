@@ -30,10 +30,10 @@ const Header = () => {
     return (
         <header className="header">
             <div className="header__logo">
-                <Link to="/">MutaEngineRental</Link>
+                <Link to="/">utaEngineRental</Link>
             </div>
             <nav className="header__nav">
-                <Link to="/products">Products</Link>
+                <Link to="/product">Products</Link>
                 <Link to="/about">About</Link>
                 <Link to="/cart" className="cart-icon">🛒</Link>
                 {user ? (
