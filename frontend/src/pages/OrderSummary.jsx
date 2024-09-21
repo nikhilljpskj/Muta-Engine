@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './OrderSummary.scss';
 
 const OrderSummary = () => {
     const { productId } = useParams();
+    const navigate = useNavigate();
     const [orderDetails, setOrderDetails] = useState(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [email, setEmail] = useState('');
+    const [mobile, setMobile] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
@@ -18,6 +23,7 @@ const OrderSummary = () => {
                 setOrderDetails(response.data);
             } catch (error) {
                 console.error('Error fetching order details:', error);
+                setError('Failed to load order details.');
             }
         };
 
@@ -46,12 +52,41 @@ const OrderSummary = () => {
         if (!start || !end) return 0;
         const startDate = new Date(start);
         const endDate = new Date(end);
-        const differenceInTime = endDate - startDate;
-        return Math.ceil(differenceInTime / (1000 * 3600 * 24));
+        return Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
     };
 
-    const handleProceedToPayment = () => {
-        // Logic for proceeding to payment
+    const handleProceedToPayment = async () => {
+        const userDetails = JSON.parse(localStorage.getItem('user'));
+        const userId = userDetails ? userDetails.id : null;
+
+        if (!userId) {
+            console.error('User is not logged in');
+            return;
+        }
+
+        const rentalDetails = {
+            product_id: orderDetails.id,
+            user_id: userId,
+            quantity,
+            start_date: startDate,
+            end_date: endDate,
+            no_of_days: calculateDaysBetween(startDate, endDate),
+            total_price: totalPrice,
+            total_price_gst: totalPrice * 0.18,
+            delivery_address: deliveryAddress,
+            contact: mobile,
+            email,
+            status: 0,
+        };
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/rentals', rentalDetails);
+            const rentalId = response.data.rentalId;
+            navigate(`/payment/${rentalId}`);
+        } catch (error) {
+            console.error('Error proceeding to payment:', error);
+            setError('Failed to proceed to payment.');
+        }
     };
 
     if (!orderDetails) return <p>Loading...</p>;
@@ -63,50 +98,82 @@ const OrderSummary = () => {
     return (
         <div className="order-summary">
             <h2>Rental Summary</h2>
+            {error && <p className="error">{error}</p>}
             <div className="order-item">
                 {imageUrl ? (
                     <img src={imageUrl} alt={orderDetails.name} className="product-image" />
                 ) : (
-                    <div className="no-image">No Image Available</div>
+                    <p>No Image Available</p>
                 )}
                 <div className="order-details">
                     <h3>{orderDetails.name}</h3>
-                    <p>Price per Day: <span>${orderDetails.price_per_day}</span></p>
-                    <label>
-                        Quantity:
-                        <input 
-                            type="number" 
-                            value={quantity} 
-                            onChange={e => setQuantity(Math.max(1, e.target.value))} 
-                            min="1" 
-                        />
-                    </label>
+                    <p>Price per Day: ${orderDetails.price_per_day}</p>
+                    <input
+                        type="number"
+                        value={quantity}
+                        onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
+                        min="1"
+                    />
                 </div>
             </div>
             <div className="date-picker">
-                <label>
+                <label htmlFor="start-date">
                     Start Date:
-                    <input 
-                        type="date" 
-                        value={startDate} 
-                        onChange={e => setStartDate(e.target.value)} 
+                    <input
+                        id="start-date"
+                        type="date"
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
                     />
                 </label>
-                <label>
+                <label htmlFor="end-date">
                     End Date:
-                    <input 
-                        type="date" 
-                        value={endDate} 
-                        onChange={e => setEndDate(e.target.value)} 
+                    <input
+                        id="end-date"
+                        type="date"
+                        value={endDate}
+                        onChange={e => setEndDate(e.target.value)}
+                    />
+                </label>
+            </div>
+            <div className="contact-info">
+                <label htmlFor="delivery-address">
+                    Delivery Address:
+                    <input
+                        id="delivery-address"
+                        type="text"
+                        value={deliveryAddress}
+                        onChange={e => setDeliveryAddress(e.target.value)}
+                        required
+                    />
+                </label>
+                <label htmlFor="email">
+                    Email:
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                    />
+                </label>
+                <label htmlFor="mobile">
+                    Mobile:
+                    <input
+                        id="mobile"
+                        type="tel"
+                        value={mobile}
+                        onChange={e => setMobile(e.target.value)}
+                        required
                     />
                 </label>
             </div>
             <div className="totals">
-                <p>Total: <span>${totalPrice.toFixed(2)}</span></p>
-                <p>GST (18%): <span>${(totalPrice * 0.18).toFixed(2)}</span></p>
-                <p>Grand Total: <span>${(totalPrice * 1.18).toFixed(2)}</span></p>
+                <p>Total: ${totalPrice.toFixed(2)}</p>
+                <p>GST (18%): ${(totalPrice * 0.18).toFixed(2)}</p>
+                <p>Grand Total: ${(totalPrice * 1.18).toFixed(2)}</p>
             </div>
-            <button className="proceed-button" onClick={handleProceedToPayment}>Proceed to Payment</button>
+            <button onClick={handleProceedToPayment}>Proceed to Payment</button>
         </div>
     );
 };
