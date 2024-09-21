@@ -9,7 +9,7 @@ const OrderSummary = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
-    const [quantity, setQuantity] = useState({});
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
@@ -35,7 +35,7 @@ const OrderSummary = () => {
         if (orderDetails) {
             const days = calculateDaysBetween(startDate, endDate);
             if (days > 0) {
-                total = orderDetails.price_per_day * (quantity[orderDetails.id] || 1) * days;
+                total = orderDetails.price_per_day * quantity * days;
             }
         }
 
@@ -48,10 +48,6 @@ const OrderSummary = () => {
         const endDate = new Date(end);
         const differenceInTime = endDate - startDate;
         return Math.ceil(differenceInTime / (1000 * 3600 * 24));
-    };
-
-    const handleQuantityChange = (newQuantity) => {
-        setQuantity(prev => ({ ...prev, [orderDetails.id]: newQuantity }));
     };
 
     const handleProceedToPayment = () => {
@@ -67,29 +63,26 @@ const OrderSummary = () => {
     return (
         <div className="order-summary">
             <h2>Rental Summary</h2>
-            {orderDetails && (
-                <div className="order-item">
-                    {imageUrl ? (
-                        <img
-                            src={imageUrl}
-                            alt={orderDetails.name}
-                            className="product-image"
-                        />
-                    ) : (
-                        <p>No Image Available</p>
-                    )}
-                    <div className="order-details">
-                        <h3>{orderDetails.name}</h3>
-                        <p>Price per Day: ${orderDetails.price_per_day}</p>
+            <div className="order-item">
+                {imageUrl ? (
+                    <img src={imageUrl} alt={orderDetails.name} className="product-image" />
+                ) : (
+                    <div className="no-image">No Image Available</div>
+                )}
+                <div className="order-details">
+                    <h3>{orderDetails.name}</h3>
+                    <p>Price per Day: <span>${orderDetails.price_per_day}</span></p>
+                    <label>
+                        Quantity:
                         <input 
                             type="number" 
-                            value={quantity[orderDetails.id] || 1} 
-                            onChange={e => handleQuantityChange(e.target.value)} 
+                            value={quantity} 
+                            onChange={e => setQuantity(Math.max(1, e.target.value))} 
                             min="1" 
                         />
-                    </div>
+                    </label>
                 </div>
-            )}
+            </div>
             <div className="date-picker">
                 <label>
                     Start Date:
@@ -109,11 +102,11 @@ const OrderSummary = () => {
                 </label>
             </div>
             <div className="totals">
-                <p>Total: ${totalPrice.toFixed(2)}</p>
-                <p>GST (18%): ${(totalPrice * 0.18).toFixed(2)}</p>
-                <p>Grand Total: ${(totalPrice * 1.18).toFixed(2)}</p>
+                <p>Total: <span>${totalPrice.toFixed(2)}</span></p>
+                <p>GST (18%): <span>${(totalPrice * 0.18).toFixed(2)}</span></p>
+                <p>Grand Total: <span>${(totalPrice * 1.18).toFixed(2)}</span></p>
             </div>
-            <button onClick={handleProceedToPayment}>Proceed to Payment</button>
+            <button className="proceed-button" onClick={handleProceedToPayment}>Proceed to Payment</button>
         </div>
     );
 };

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import './Product.scss';
 
 const Product = () => {
     const [sort, setSort] = useState('');
     const [products, setProducts] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState(products);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -26,40 +26,44 @@ const Product = () => {
     const handleSort = (e) => {
         const value = e.target.value;
         setSort(value);
+        let sortedProducts = [...products];
         if (value === 'price-low-high') {
-            setFilteredProducts([...products].sort((a, b) => a.price_per_day - b.price_per_day));
+            sortedProducts.sort((a, b) => a.price_per_day - b.price_per_day);
         } else if (value === 'price-high-low') {
-            setFilteredProducts([...products].sort((a, b) => b.price_per_day - a.price_per_day));
+            sortedProducts.sort((a, b) => b.price_per_day - a.price_per_day);
         }
+        setFilteredProducts(sortedProducts);
     };
 
     return (
         <div className="product-page">
+            <h1 className="page-title">Products</h1>
             <div className="filter-sort">
                 <select onChange={handleSort} value={sort}>
                     <option value="">Sort By</option>
                     <option value="price-low-high">Price: Low to High</option>
                     <option value="price-high-low">Price: High to Low</option>
                 </select>
-                <button>Filter</button>
+                <button className="filter-button">Filter</button>
             </div>
             <div className="product-list">
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
-                        <div key={product.id} className="product-item">
-                            {product.image_urls && product.image_urls.length > 0 ? (
-                                <img
-                                    src={`http://localhost:5000${product.image_urls[0]}`}
-                                    alt={product.name}
-                                    className="product-image"
-                                    onClick={() => navigate(`/product/${product.id}`)} // Use navigate for redirection
-                                />
-                            ) : (
-                                <p>No Image Available</p>
-                            )}
-                            <p>{product.name}</p>
-                            <p>Price: ${product.price_per_day}</p>
-                            <p>Category: {product.category_name}</p>
+                        <div key={product.id} className="product-item" onClick={() => navigate(`/product/${product.id}`)}>
+                            <div className="image-container">
+                                {product.image_urls && product.image_urls.length > 0 ? (
+                                    <img
+                                        src={`http://localhost:5000${product.image_urls[0]}`}
+                                        alt={product.name}
+                                        className="product-image"
+                                    />
+                                ) : (
+                                    <div className="no-image">No Image Available</div>
+                                )}
+                            </div>
+                            <h3 className="product-name">{product.name}</h3>
+                            <p className="product-price">Price: ${product.price_per_day}</p>
+                            <p className="product-category">Category: {product.category_name}</p>
                         </div>
                     ))
                 ) : (
