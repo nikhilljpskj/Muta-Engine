@@ -1,0 +1,42 @@
+
+.payment-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 120px); // Adjusting for header and footer height
+
+  h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .rental-details {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: #555;
+    p {
+      margin: 5px 0;
+    }
+  }
+
+  .pay-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #F37254;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #d95a42;
+    }
+  }
+}
